@@ -20,7 +20,7 @@ async function verificarSuperAdmin() {
 // PATCH: Atualizar grupo
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: any
 ) {
   const check = await verificarSuperAdmin();
   if ('erro' in check) {
@@ -29,14 +29,16 @@ export async function PATCH(
 
   try {
     const { nome, descricao, nomeDono, telefoneDono } = await request.json();
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
 
-    const grupo = await prisma.grupo.findUnique({ where: { id: params.id } });
+    const grupo = await prisma.grupo.findUnique({ where: { id } });
     if (!grupo) {
       return NextResponse.json({ erro: 'Grupo não encontrado' }, { status: 404 });
     }
 
     const atualizado = await prisma.grupo.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(nome !== undefined && { nome: nome.trim() }),
         ...(descricao !== undefined && { descricao: descricao?.trim() || null }),
@@ -55,7 +57,7 @@ export async function PATCH(
 // DELETE: Excluir grupo
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: any
 ) {
   const check = await verificarSuperAdmin();
   if ('erro' in check) {
@@ -63,8 +65,11 @@ export async function DELETE(
   }
 
   try {
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
+
     const grupo = await prisma.grupo.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { _count: { select: { qualificacoes: true } } },
     });
 
@@ -80,7 +85,7 @@ export async function DELETE(
       );
     }
 
-    await prisma.grupo.delete({ where: { id: params.id } });
+    await prisma.grupo.delete({ where: { id } });
 
     return NextResponse.json({ sucesso: true });
   } catch (error) {
