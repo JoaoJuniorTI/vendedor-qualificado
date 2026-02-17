@@ -1,0 +1,102 @@
+/* ============================================================
+   VENDEDOR QUALIFICADO - Estilos Globais
+   ============================================================
+   Estilo limpo e moderno inspirado no design da Apple.
+   Usa Tailwind CSS como base.
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- Reset e Base ---- */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-surface-100 text-surface-800;
+    font-feature-settings: 'kern' 1;
+  }
+
+  /* Links sem underline por padrão */
+  a {
+    @apply text-brand-500 no-underline transition-colors duration-200;
+  }
+  a:hover {
+    @apply text-brand-600;
+  }
+
+  /* Inputs com estilo Apple */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="search"],
+  select,
+  textarea {
+    @apply w-full rounded-apple border border-surface-200 bg-white px-4 py-3
+           text-surface-800 placeholder-surface-400
+           transition-all duration-200
+           focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200;
+  }
+}
+
+/* ---- Componentes Reutilizáveis ---- */
+@layer components {
+  /* Botão Primário (azul, estilo Apple) */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-apple bg-brand-500 px-6 py-3
+           text-sm font-semibold text-white
+           shadow-apple transition-all duration-200
+           hover:bg-brand-600 hover:shadow-apple-md
+           active:scale-[0.98]
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Botão Secundário (outline) */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-apple border border-surface-200 bg-white px-6 py-3
+           text-sm font-semibold text-surface-800
+           shadow-apple transition-all duration-200
+           hover:bg-surface-50 hover:shadow-apple-md
+           active:scale-[0.98]
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Botão de Perigo (vermelho, para exclusão) */
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-apple bg-negativa px-6 py-3
+           text-sm font-semibold text-white
+           shadow-apple transition-all duration-200
+           hover:bg-negativa-dark hover:shadow-apple-md
+           active:scale-[0.98]
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Card (container com sombra Apple) */
+  .card {
+    @apply rounded-apple-lg bg-white p-6 shadow-apple;
+  }
+
+  /* Badge de tipo de qualificação */
+  .badge-positiva {
+    @apply inline-flex items-center gap-1 rounded-full bg-positiva-light px-3 py-1
+           text-xs font-semibold text-positiva-dark;
+  }
+  .badge-negativa {
+    @apply inline-flex items-center gap-1 rounded-full bg-negativa-light px-3 py-1
+           text-xs font-semibold text-negativa-dark;
+  }
+  .badge-neutra {
+    @apply inline-flex items-center gap-1 rounded-full bg-neutra-light px-3 py-1
+           text-xs font-semibold text-neutra-dark;
+  }
+}

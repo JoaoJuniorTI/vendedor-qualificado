@@ -1,0 +1,156 @@
+// ============================================================
+// VENDEDOR QUALIFICADO - Schema do Banco de Dados
+// ============================================================
+// Este arquivo define todas as tabelas do sistema.
+// O Prisma usa este arquivo para criar as tabelas no PostgreSQL
+// e gerar o client TypeScript para acessar o banco.
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------------
+// ENUM: Papel do Administrador
+// ------------------------------------------------------------
+enum Papel {
+  SUPER_ADMIN
+  ADMIN
+}
+
+// ------------------------------------------------------------
+// ENUM: Tipo da Qualificação
+// ------------------------------------------------------------
+enum TipoQualificacao {
+  POSITIVA
+  NEGATIVA
+  NEUTRA
+}
+
+// ------------------------------------------------------------
+// TABELA: Administrador
+// ------------------------------------------------------------
+// Usuários que fazem login no sistema para cadastrar qualificações.
+// O Super Admin tem acesso irrestrito; o Admin é vinculado a grupos.
+// ------------------------------------------------------------
+model Administrador {
+  id            String   @id @default(uuid())
+  nome          String   @db.VarChar(200)
+  email         String   @unique @db.VarChar(200)
+  senhaHash     String   @map("senha_hash") @db.VarChar(255)
+  papel         Papel    @default(ADMIN)
+  ativo         Boolean  @default(true)
+  criadoEm      DateTime @default(now()) @map("criado_em")
+  atualizadoEm  DateTime @updatedAt @map("atualizado_em")
+
+  // Relacionamentos
+  grupos                  AdminGrupo[]
+  qualificacoesCadastradas Qualificacao[] @relation("QualificacaoCadastradaPor")
+  qualificacoesExcluidas  Qualificacao[] @relation("QualificacaoExcluidaPor")
+
+  @@map("administradores")
+}
+
+// ------------------------------------------------------------
+// TABELA: Grupo
+// ------------------------------------------------------------
+// Representa um grupo de WhatsApp onde acontecem as vendas.
+// Cada qualificação pertence a um grupo específico.
+// ------------------------------------------------------------
+model Grupo {
+  id            String   @id @default(uuid())
+  nome          String   @db.VarChar(200)
+  descricao     String?  @db.Text
+  nomeDono      String   @map("nome_dono") @db.VarChar(200)
+  telefoneDono  String   @map("telefone_dono") @db.VarChar(20)
+  criadoEm      DateTime @default(now()) @map("criado_em")
+  atualizadoEm  DateTime @updatedAt @map("atualizado_em")
+
+  // Relacionamentos
+  admins        AdminGrupo[]
+  qualificacoes Qualificacao[]
+
+  @@map("grupos")
+}
+
+// ------------------------------------------------------------
+// TABELA: AdminGrupo (Relacionamento N:N)
+// ------------------------------------------------------------
+// Liga Administradores aos Grupos que eles gerenciam.
+// Um admin pode ter vários grupos; um grupo pode ter vários admins.
+// ------------------------------------------------------------
+model AdminGrupo {
+  id       String   @id @default(uuid())
+  adminId  String   @map("admin_id")
+  grupoId  String   @map("grupo_id")
+  criadoEm DateTime @default(now()) @map("criado_em")
+
+  // Relacionamentos
+  admin Administrador @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  grupo Grupo         @relation(fields: [grupoId], references: [id], onDelete: Cascade)
+
+  // Índice único: impede que o mesmo admin seja vinculado ao mesmo grupo duas vezes
+  @@unique([adminId, grupoId])
+  @@map("admin_grupos")
+}
+
+// ------------------------------------------------------------
+// TABELA: Vendedor
+// ------------------------------------------------------------
+// Pessoa que vende nos grupos de WhatsApp e recebe qualificações.
+// Criado automaticamente na primeira qualificação (RN02).
+// Identificado unicamente pelo telefone (RN01).
+// ------------------------------------------------------------
+model Vendedor {
+  id            String   @id @default(uuid())
+  telefone      String   @unique @db.VarChar(20)
+  nome          String   @db.VarChar(200)
+  fotoPerfilUrl String?  @map("foto_perfil_url") @db.VarChar(500)
+  criadoEm      DateTime @default(now()) @map("criado_em")
+  atualizadoEm  DateTime @updatedAt @map("atualizado_em")
+
+  // Relacionamentos
+  qualificacoes Qualificacao[]
+
+  @@map("vendedores")
+}
+
+// ------------------------------------------------------------
+// TABELA: Qualificação
+// ------------------------------------------------------------
+// Registro de uma avaliação feita por um comprador sobre um vendedor.
+// Usa soft delete: quando excluída, marca excluido=true e registra
+// quem excluiu e quando (RN06, RN07, RN08).
+// ------------------------------------------------------------
+model Qualificacao {
+  id                 String           @id @default(uuid())
+  vendedorId         String           @map("vendedor_id")
+  grupoId            String           @map("grupo_id")
+  adminCadastrouId   String           @map("admin_cadastrou_id")
+  telefoneComprador  String           @map("telefone_comprador") @db.VarChar(20)
+  nomeComprador      String           @map("nome_comprador") @db.VarChar(200)
+  tipo               TipoQualificacao
+  estrelas           Int              @db.SmallInt
+  fotoUrl            String           @map("foto_url") @db.VarChar(500)
+  criadoEm           DateTime         @default(now()) @map("criado_em")
+  excluido           Boolean          @default(false)
+  excluidoEm         DateTime?        @map("excluido_em")
+  adminExcluiuId     String?          @map("admin_excluiu_id")
+
+  // Relacionamentos
+  vendedor         Vendedor      @relation(fields: [vendedorId], references: [id], onDelete: Cascade)
+  grupo            Grupo         @relation(fields: [grupoId], references: [id], onDelete: Cascade)
+  adminCadastrou   Administrador @relation("QualificacaoCadastradaPor", fields: [adminCadastrouId], references: [id])
+  adminExcluiu     Administrador? @relation("QualificacaoExcluidaPor", fields: [adminExcluiuId], references: [id])
+
+  // Índices para performance nas consultas mais comuns
+  @@index([vendedorId, excluido])  // Busca qualificações ativas de um vendedor
+  @@index([grupoId])               // Filtro por grupo
+  @@index([criadoEm])              // Ordenação por data
+  @@map("qualificacoes")
+}
