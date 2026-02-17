@@ -14,7 +14,7 @@ import prisma from '@/lib/prisma';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   // Verifica autenticação
   const session = await getServerSession(authOptions);

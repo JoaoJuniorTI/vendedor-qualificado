@@ -20,7 +20,7 @@ async function verificarSuperAdmin() {
 // PATCH: Atualizar grupo
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const check = await verificarSuperAdmin();
   if ('erro' in check) {

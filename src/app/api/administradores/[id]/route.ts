@@ -21,7 +21,7 @@ async function verificarSuperAdmin() {
 // PATCH: Atualizar admin (nome, email, senha, grupos, ativo)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const check = await verificarSuperAdmin();
   if ('erro' in check) {
