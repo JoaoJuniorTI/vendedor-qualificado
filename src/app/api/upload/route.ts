@@ -74,10 +74,10 @@ export async function POST(request: NextRequest) {
     const url = await salvarImagem(buffer, tipo);
 
     return NextResponse.json({ url });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro no upload:', error);
     return NextResponse.json(
-      { erro: 'Erro ao processar a imagem' },
+      { erro: 'Erro ao processar a imagem', detalhe: error.message || String(error) },
       { status: 500 }
     );
   }

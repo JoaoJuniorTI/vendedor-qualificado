@@ -209,7 +209,7 @@ export default function NovaQualificacaoPage() {
 
       if (!uploadRes.ok) {
         const uploadErro = await uploadRes.json();
-        toast.error(uploadErro.erro || 'Erro ao enviar foto');
+        toast.error(uploadErro.detalhe || uploadErro.erro || 'Erro ao enviar foto');
         return;
       }
 
