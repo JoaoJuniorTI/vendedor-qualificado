@@ -70,8 +70,8 @@ export async function POST(request: NextRequest) {
     const bytes = await arquivo.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Comprime e salva a imagem
-    const url = await salvarImagem(buffer, tipo);
+    // Salva a imagem no Vercel Blob
+    const url = await salvarImagem(buffer, tipo, arquivo.type);
 
     return NextResponse.json({ url });
   } catch (error: any) {
