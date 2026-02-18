@@ -1,83 +1,84 @@
 // ============================================================
 // API: Upload de Imagem
 // ============================================================
-// POST /api/upload
-//
-// Recebe uma imagem via FormData, comprime e salva no disco.
-// Retorna a URL pública da imagem salva.
-//
-// Parâmetros do FormData:
-//   - arquivo: o arquivo de imagem
-//   - tipo: 'qualificacao' ou 'perfil'
-//
-// Requer autenticação (apenas admins podem fazer upload).
-// ============================================================
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { salvarImagem } from '@/lib/upload';
+import { put } from '@vercel/blob';
+import { randomUUID } from 'crypto';
 
 export async function POST(request: NextRequest) {
-  // Verifica se está autenticado
-  const session = await getServerSession(authOptions);
-  if (!session) {
+  // Passo 1: Verifica autenticação
+  let session;
+  try {
+    session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ erro: 'Não autenticado' }, { status: 401 });
+    }
+  } catch (error: any) {
     return NextResponse.json(
-      { erro: 'Não autenticado' },
-      { status: 401 }
+      { erro: 'Erro na autenticação', detalhe: error.message },
+      { status: 500 }
     );
   }
 
+  // Passo 2: Lê o FormData
+  let arquivo: File;
+  let tipo: string;
   try {
-    // Lê o FormData da requisição
     const formData = await request.formData();
-    const arquivo = formData.get('arquivo') as File | null;
-    const tipo = formData.get('tipo') as 'qualificacao' | 'perfil' | null;
+    arquivo = formData.get('arquivo') as File;
+    tipo = formData.get('tipo') as string;
 
-    // Validações
     if (!arquivo) {
-      return NextResponse.json(
-        { erro: 'Nenhum arquivo enviado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ erro: 'Nenhum arquivo enviado' }, { status: 400 });
     }
-
     if (!tipo || !['qualificacao', 'perfil'].includes(tipo)) {
-      return NextResponse.json(
-        { erro: 'Tipo deve ser "qualificacao" ou "perfil"' },
-        { status: 400 }
-      );
+      return NextResponse.json({ erro: 'Tipo inválido' }, { status: 400 });
     }
-
-    // Verifica se é uma imagem
-    if (!arquivo.type.startsWith('image/')) {
-      return NextResponse.json(
-        { erro: 'O arquivo deve ser uma imagem (JPG, PNG, etc.)' },
-        { status: 400 }
-      );
-    }
-
-    // Limite de 5MB
-    const LIMITE_5MB = 5 * 1024 * 1024;
-    if (arquivo.size > LIMITE_5MB) {
-      return NextResponse.json(
-        { erro: 'A imagem deve ter no máximo 5MB' },
-        { status: 400 }
-      );
-    }
-
-    // Converte o File para Buffer
-    const bytes = await arquivo.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Salva a imagem no Vercel Blob
-    const url = await salvarImagem(buffer, tipo, arquivo.type);
-
-    return NextResponse.json({ url });
   } catch (error: any) {
-    console.error('Erro no upload:', error);
     return NextResponse.json(
-      { erro: 'Erro ao processar a imagem', detalhe: error.message || String(error) },
+      { erro: 'Erro ao ler FormData', detalhe: error.message },
+      { status: 500 }
+    );
+  }
+
+  // Passo 3: Valida o arquivo
+  if (!arquivo.type.startsWith('image/')) {
+    return NextResponse.json({ erro: 'O arquivo deve ser uma imagem' }, { status: 400 });
+  }
+  if (arquivo.size > 5 * 1024 * 1024) {
+    return NextResponse.json({ erro: 'Máximo 5MB' }, { status: 400 });
+  }
+
+  // Passo 4: Converte para Buffer
+  let buffer: Buffer;
+  try {
+    const bytes = await arquivo.arrayBuffer();
+    buffer = Buffer.from(bytes);
+  } catch (error: any) {
+    return NextResponse.json(
+      { erro: 'Erro ao converter arquivo', detalhe: error.message },
+      { status: 500 }
+    );
+  }
+
+  // Passo 5: Salva no Vercel Blob
+  try {
+    const pasta = tipo === 'perfil' ? 'perfis' : 'qualificacoes';
+    const extensao = arquivo.type.includes('png') ? 'png' : 'jpg';
+    const nomeArquivo = `${pasta}/${randomUUID()}.${extensao}`;
+
+    const blob = await put(nomeArquivo, buffer, {
+      access: 'public',
+      contentType: arquivo.type,
+    });
+
+    return NextResponse.json({ url: blob.url });
+  } catch (error: any) {
+    return NextResponse.json(
+      { erro: 'Erro ao salvar no Blob Storage', detalhe: error.message },
       { status: 500 }
     );
   }
