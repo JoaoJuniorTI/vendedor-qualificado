@@ -20,6 +20,7 @@ import {
   HiArrowRightOnRectangle,
   HiBars3,
   HiXMark,
+  HiMegaphone,
 } from 'react-icons/hi2';
 import { useState } from 'react';
 import Loading from '@/components/ui/Loading';
@@ -43,6 +44,12 @@ const menuItems = [
     label: 'Foto de Vendedor',
     icon: HiPhoto,
     papel: ['ADMIN', 'SUPER_ADMIN'],
+  },
+  {
+    href: '/admin/destaques',
+    label: 'Destaques',
+    icon: HiMegaphone,
+    papel: ['SUPER_ADMIN'],
   },
   {
     href: '/admin/grupos',

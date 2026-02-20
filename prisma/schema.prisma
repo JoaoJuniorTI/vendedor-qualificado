@@ -121,8 +121,32 @@ model Vendedor {
 }
 
 // ------------------------------------------------------------
-// TABELA: Qualificação
+// ENUM: Posição do Destaque
 // ------------------------------------------------------------
+enum PosicaoDestaque {
+  ESQUERDA
+  DIREITA
+}
+
+// ------------------------------------------------------------
+// TABELA: Destaque
+// ------------------------------------------------------------
+// Conteúdos em destaque exibidos na página pública.
+// Desktop: lateral esquerda e direita. Mobile: topo e rodapé.
+// ------------------------------------------------------------
+model Destaque {
+  id          String          @id @default(uuid())
+  posicao     PosicaoDestaque
+  titulo      String          @db.VarChar(200)
+  imagemUrl   String          @map("imagem_url") @db.VarChar(500)
+  linkUrl     String          @map("link_url") @db.VarChar(500)
+  ativo       Boolean         @default(true)
+  acessos     Int             @default(0)
+  criadoEm    DateTime        @default(now()) @map("criado_em")
+  atualizadoEm DateTime     @updatedAt @map("atualizado_em")
+
+  @@map("destaques")
+}
 // Registro de uma avaliação feita por um comprador sobre um vendedor.
 // Usa soft delete: quando excluída, marca excluido=true e registra
 // quem excluiu e quando (RN06, RN07, RN08).

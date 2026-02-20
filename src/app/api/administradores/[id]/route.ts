@@ -21,7 +21,7 @@ async function verificarSuperAdmin() {
 // PATCH: Atualizar admin (nome, email, senha, grupos, ativo)
 export async function PATCH(
   request: NextRequest,
-  { params }: any
+  { params }: { params: { id: string } }
 ) {
   const check = await verificarSuperAdmin();
   if ('erro' in check) {
@@ -30,8 +30,7 @@ export async function PATCH(
 
   try {
     const { nome, email, senha, grupoIds, ativo } = await request.json();
-    const resolvedParams = await params;
-    const adminId = resolvedParams.id;
+    const adminId = params.id;
 
     // Verifica se o admin existe
     const admin = await prisma.administrador.findUnique({ where: { id: adminId } });

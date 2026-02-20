@@ -14,7 +14,7 @@ import prisma from '@/lib/prisma';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: any
+  { params }: { params: { id: string } }
 ) {
   // Verifica autenticação
   const session = await getServerSession(authOptions);
@@ -22,8 +22,7 @@ export async function DELETE(
     return NextResponse.json({ erro: 'Não autenticado' }, { status: 401 });
   }
 
-  const resolvedParams = await params;
-  const qualificacaoId = resolvedParams.id;
+  const qualificacaoId = params.id;
   const adminId = (session.user as any).id;
   const papel = (session.user as any).papel;
   const grupoIds = (session.user as any).grupoIds as string[];

@@ -20,7 +20,7 @@ async function verificarSuperAdmin() {
 // PATCH: Atualizar grupo
 export async function PATCH(
   request: NextRequest,
-  { params }: any
+  { params }: { params: { id: string } }
 ) {
   const check = await verificarSuperAdmin();
   if ('erro' in check) {
@@ -29,8 +29,7 @@ export async function PATCH(
 
   try {
     const { nome, descricao, nomeDono, telefoneDono } = await request.json();
-    const resolvedParams = await params;
-    const id = resolvedParams.id;
+    const id = params.id;
 
     const grupo = await prisma.grupo.findUnique({ where: { id } });
     if (!grupo) {
@@ -57,7 +56,7 @@ export async function PATCH(
 // DELETE: Excluir grupo
 export async function DELETE(
   request: NextRequest,
-  { params }: any
+  { params }: { params: { id: string } }
 ) {
   const check = await verificarSuperAdmin();
   if ('erro' in check) {
@@ -65,8 +64,7 @@ export async function DELETE(
   }
 
   try {
-    const resolvedParams = await params;
-    const id = resolvedParams.id;
+    const id = params.id;
 
     const grupo = await prisma.grupo.findUnique({
       where: { id },

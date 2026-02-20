@@ -25,6 +25,7 @@ import {
 import StarRating from '@/components/ui/StarRating';
 import TipoBadge from '@/components/ui/TipoBadge';
 import Loading from '@/components/ui/Loading';
+import Vitrine from '@/components/Vitrine';
 
 // Tipos para os dados que vêm da API
 interface Vendedor {
@@ -159,6 +160,9 @@ export default function ConsultaPage() {
   // === RESULTADO ===
   return (
     <div className="min-h-screen pb-8">
+      {/* Vitrine de destaques */}
+      <Vitrine />
+
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-surface-200 bg-white/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3">

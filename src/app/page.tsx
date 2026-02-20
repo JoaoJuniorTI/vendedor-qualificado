@@ -11,6 +11,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { HiMagnifyingGlass, HiShieldCheck } from 'react-icons/hi2';
+import Vitrine from '@/components/Vitrine';
 
 export default function HomePage() {
   const router = useRouter();
@@ -49,6 +50,9 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
+      {/* Vitrine de destaques */}
+      <Vitrine />
+
       {/* Container central */}
       <div className="w-full max-w-md text-center">
 
