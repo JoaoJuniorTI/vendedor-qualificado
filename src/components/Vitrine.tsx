@@ -85,9 +85,12 @@ export default function Vitrine() {
         </section>
       )}
 
-      {/* ===== DESKTOP: Destaque esquerdo (fixo na lateral) ===== */}
+      {/* ===== DESKTOP: Destaque esquerdo (próximo ao conteúdo central) ===== */}
       {itemEsquerda && (
-        <aside className="fixed left-4 top-1/2 z-30 hidden -translate-y-1/2 lg:block xl:left-6 2xl:left-10">
+        <aside
+          className="fixed top-1/2 z-30 hidden -translate-y-1/2 lg:block"
+          style={{ right: 'calc(50% + 260px)' }}
+        >
           <div
             onClick={() => handleVisitar(itemEsquerda)}
             className="group cursor-pointer overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
@@ -97,16 +100,19 @@ export default function Vitrine() {
             <img
               src={itemEsquerda.imagemUrl}
               alt={itemEsquerda.titulo}
-              className="h-auto w-[160px] object-cover xl:w-[200px] 2xl:w-[240px]"
+              className="h-auto w-[180px] object-cover xl:w-[220px]"
               loading="lazy"
             />
           </div>
         </aside>
       )}
 
-      {/* ===== DESKTOP: Destaque direito (fixo na lateral) ===== */}
+      {/* ===== DESKTOP: Destaque direito (próximo ao conteúdo central) ===== */}
       {itemDireita && (
-        <aside className="fixed right-4 top-1/2 z-30 hidden -translate-y-1/2 lg:block xl:right-6 2xl:right-10">
+        <aside
+          className="fixed top-1/2 z-30 hidden -translate-y-1/2 lg:block"
+          style={{ left: 'calc(50% + 260px)' }}
+        >
           <div
             onClick={() => handleVisitar(itemDireita)}
             className="group cursor-pointer overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
@@ -116,7 +122,7 @@ export default function Vitrine() {
             <img
               src={itemDireita.imagemUrl}
               alt={itemDireita.titulo}
-              className="h-auto w-[160px] object-cover xl:w-[200px] 2xl:w-[240px]"
+              className="h-auto w-[180px] object-cover xl:w-[220px]"
               loading="lazy"
             />
           </div>
