@@ -19,7 +19,7 @@ interface ItemVitrine {
   linkUrl: string;
 }
 
-export default function Vitrine() {
+export default function Vitrine({ somenteMovel = false }: { somenteMovel?: boolean }) {
   const [itens, setItens] = useState<ItemVitrine[]>([]);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export default function Vitrine() {
       )}
 
       {/* ===== DESKTOP: Destaque esquerdo (próximo ao conteúdo central) ===== */}
-      {itemEsquerda && (
+      {!somenteMovel && itemEsquerda && (
         <aside
           className="fixed top-1/2 z-30 hidden -translate-y-1/2 lg:block"
           style={{ right: 'calc(50% + 260px)' }}
@@ -108,7 +108,7 @@ export default function Vitrine() {
       )}
 
       {/* ===== DESKTOP: Destaque direito (próximo ao conteúdo central) ===== */}
-      {itemDireita && (
+      {!somenteMovel && itemDireita && (
         <aside
           className="fixed top-1/2 z-30 hidden -translate-y-1/2 lg:block"
           style={{ left: 'calc(50% + 260px)' }}

@@ -21,6 +21,7 @@ import {
   HiUserCircle,
   HiUserGroup,
   HiXMark,
+  HiChevronDown,
 } from 'react-icons/hi2';
 import StarRating from '@/components/ui/StarRating';
 import TipoBadge from '@/components/ui/TipoBadge';
@@ -73,6 +74,7 @@ export default function ConsultaPage() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [fotoAmpliada, setFotoAmpliada] = useState<string | null>(null);
+  const [expandidos, setExpandidos] = useState<Set<string>>(new Set());
 
   // Busca os dados do vendedor ao carregar a página
   useEffect(() => {
@@ -160,8 +162,8 @@ export default function ConsultaPage() {
   // === RESULTADO ===
   return (
     <div className="min-h-screen pb-8">
-      {/* Vitrine de destaques */}
-      <Vitrine />
+      {/* Vitrine de destaques (só mobile nesta página) */}
+      <Vitrine somenteMovel />
 
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-surface-200 bg-white/80 backdrop-blur-xl">
@@ -282,39 +284,68 @@ export default function ConsultaPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {qualificacoes.map((q) => (
-                <div key={q.id} className="card">
-                  <div className="mb-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <TipoBadge tipo={q.tipo} />
-                      <span className="text-xs text-surface-400">
-                        {q.grupo.nome}
-                      </span>
+              {qualificacoes.map((q, index) => {
+                const isExpandido = index === 0 || expandidos.has(q.id);
+
+                function toggleExpandir() {
+                  setExpandidos((prev) => {
+                    const novo = new Set(prev);
+                    if (novo.has(q.id)) {
+                      novo.delete(q.id);
+                    } else {
+                      novo.add(q.id);
+                    }
+                    return novo;
+                  });
+                }
+
+                return (
+                  <div key={q.id} className="card">
+                    {/* Cabeçalho do card (sempre visível) */}
+                    <div
+                      className={`flex items-center justify-between ${index !== 0 ? 'cursor-pointer' : ''}`}
+                      onClick={index !== 0 ? toggleExpandir : undefined}
+                    >
+                      <div className="flex items-center gap-2">
+                        <TipoBadge tipo={q.tipo} />
+                        <span className="text-xs text-surface-400">
+                          {q.grupo.nome}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <StarRating value={q.estrelas} size={14} />
+                        <span className="text-xs text-surface-400">
+                          {formatarData(q.criadoEm)}
+                        </span>
+                        {index !== 0 && (
+                          <HiChevronDown
+                            size={16}
+                            className={`text-surface-400 transition-transform duration-200 ${isExpandido ? 'rotate-180' : ''}`}
+                          />
+                        )}
+                      </div>
                     </div>
-                    <span className="text-xs text-surface-400">
-                      {formatarData(q.criadoEm)}
-                    </span>
-                  </div>
 
-                  <div className="mb-3">
-                    <StarRating value={q.estrelas} size={16} />
+                    {/* Conteúdo expandido (foto) */}
+                    {isExpandido && (
+                      <div className="mt-3">
+                        <div
+                          className="cursor-pointer overflow-hidden rounded-apple"
+                          onClick={() => setFotoAmpliada(q.fotoUrl)}
+                        >
+                          <Image
+                            src={q.fotoUrl}
+                            alt="Foto da qualificação"
+                            width={600}
+                            height={400}
+                            className="h-auto w-full object-cover transition-transform duration-200 hover:scale-[1.02]"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
-
-                  {/* Foto da qualificação */}
-                  <div
-                    className="cursor-pointer overflow-hidden rounded-apple"
-                    onClick={() => setFotoAmpliada(q.fotoUrl)}
-                  >
-                    <Image
-                      src={q.fotoUrl}
-                      alt="Foto da qualificação"
-                      width={600}
-                      height={400}
-                      className="h-auto w-full object-cover transition-transform duration-200 hover:scale-[1.02]"
-                    />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
